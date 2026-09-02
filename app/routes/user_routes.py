@@ -1,11 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.database import get_db
-from app.models import User
-from app.auth import verify_token
 from pydantic import BaseModel
 
-from fastapi import Depends
+from app.database import get_db
+from app.models import User
 from app.auth.verify_token import verify_token
 
 router = APIRouter(prefix="/user", tags=["user"])
@@ -15,7 +13,6 @@ router = APIRouter(prefix="/user", tags=["user"])
 # Pydantic Schemas
 # -----------------------------
 class UserCreate(BaseModel):
-    email: str
     name: str
     cep: str | None = None
     address: str | None = None
@@ -24,7 +21,6 @@ class UserCreate(BaseModel):
     district: str | None = None
     city: str | None = None
     state: str | None = None
-
 
 class UserUpdate(BaseModel):
     name: str | None = None
@@ -41,9 +37,21 @@ class UserUpdate(BaseModel):
 # POST - Criar usuário
 # -----------------------------
 @router.post("/", dependencies=[Depends(verify_token)])
-def create_user(user: UserCreate, db: Session = Depends(get_db)):
+def create_user(
+    user: UserCreate,
+    db: Session = Depends(get_db),
+    token_payload: dict = Depends(verify_token)
+):
+    auth0_id = token_payload["sub"]
+    email = token_payload["email"]
+
+    existing = db.query(User).filter(User.auth0_id == auth0_id).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Usuário já existe no sistema")
+
     db_user = User(
-        email=user.email,
+        auth0_id=auth0_id,
+        email=email,
         name=user.name,
         cep=user.cep,
         address=user.address,
@@ -62,12 +70,16 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
 
 
 # -----------------------------
-# GET - Buscar usuário por ID
+# GET - Buscar usuário do próprio Auth0
 # -----------------------------
-@router.get("/{user_id}", dependencies=[Depends(verify_token)])
-def get_user(user_id: int, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.id == user_id).first()
+@router.get("/me", dependencies=[Depends(verify_token)])
+def get_my_user(
+    db: Session = Depends(get_db),
+    token_payload: dict = Depends(verify_token)
+):
+    auth0_id = token_payload["sub"]
 
+    user = db.query(User).filter(User.auth0_id == auth0_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
@@ -77,10 +89,15 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
 # -----------------------------
 # PUT - Atualizar usuário
 # -----------------------------
-@router.put("/{user_id}", dependencies=[Depends(verify_token)])
-def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.id == user_id).first()
+@router.put("/me", dependencies=[Depends(verify_token)])
+def update_my_user(
+    user_update: UserUpdate,
+    db: Session = Depends(get_db),
+    token_payload: dict = Depends(verify_token)
+):
+    auth0_id = token_payload["sub"]
 
+    user = db.query(User).filter(User.auth0_id == auth0_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
@@ -96,16 +113,72 @@ def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get
 
 
 # -----------------------------
+# PUT - Atualizar email (Auth0 + Banco)
+# -----------------------------
+from app.auth0_management import update_auth0_email
+
+class EmailUpdate(BaseModel):
+    email: str
+
+@router.put("/me/email", dependencies=[Depends(verify_token)])
+def update_my_email(
+    data: EmailUpdate,
+    db: Session = Depends(get_db),
+    token_payload: dict = Depends(verify_token)
+):
+    auth0_id = token_payload["sub"]
+
+    user = db.query(User).filter(User.auth0_id == auth0_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+    # Atualiza no Auth0
+    update_auth0_email(auth0_id, data.email)
+
+    # Atualiza no banco
+    user.email = data.email
+    db.commit()
+    db.refresh(user)
+
+    return {"message": "Email atualizado com sucesso"}
+
+
+# -----------------------------
+# POST - Reset de senha via Auth0
+# -----------------------------
+from app.auth0_management import send_password_reset
+
+@router.post("/me/reset-password", dependencies=[Depends(verify_token)])
+def reset_password(
+    db: Session = Depends(get_db),
+    token_payload: dict = Depends(verify_token)
+):
+    email = token_payload["email"]
+
+    send_password_reset(email)
+
+    return {"message": "Email de redefinição enviado"}
+    
+
+# -----------------------------
 # DELETE - Remover usuário
 # -----------------------------
-@router.delete("/{user_id}", dependencies=[Depends(verify_token)])
-def delete_user(user_id: int, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.id == user_id).first()
+from app.auth0_management import delete_auth0_user
 
+@router.delete("/me", dependencies=[Depends(verify_token)])
+def delete_my_user(
+    db: Session = Depends(get_db),
+    token_payload: dict = Depends(verify_token)
+):
+    auth0_id = token_payload["sub"]
+
+    user = db.query(User).filter(User.auth0_id == auth0_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
     db.delete(user)
     db.commit()
+
+    delete_auth0_user(auth0_id)
 
     return {"message": "Usuário removido com sucesso"}

@@ -10,10 +10,8 @@ app = FastAPI()
 # Inicializa o banco
 Base.metadata.create_all(bind=engine)
 
-# Middleware de segurança (Bearer Token)
 security = HTTPBearer()
 
-# Rota protegida simples para teste
 @app.get("/auth-test")
 def auth_test(token = Depends(security)):
     payload = verify_token(token.credentials)
@@ -23,6 +21,5 @@ def auth_test(token = Depends(security)):
         "message": "Token válido. Backend + Auth0 funcionando!"
     }
 
-# Rotas existentes
 app.include_router(health_router)
 app.include_router(user_router)
