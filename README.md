@@ -7,7 +7,7 @@
 #
 #####################################################################################
 
-Este projeto é o MVP da Sprint **Desenvolvimento Back-End Avançado**.
+Este projeto faz parte do MVP da Sprint **Desenvolvimento Back-End Avançado**.
 
 ---
 
