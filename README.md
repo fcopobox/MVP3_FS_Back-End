@@ -55,7 +55,7 @@ Caso o comando não retorne a versão instalada, instale o Docker Desktop antes 
 Após clonar o repositório, abra o **PowerShell** ou **Command Prompt** e navegue até o diretório raiz do backend (certifique-se do nome da pasta):
 
 -----------------------------------
-`cd WeatherMap_FS_Back-End`
+`cd MVP3_FS_Back-End`
 -----------------------------------
 
 ---
