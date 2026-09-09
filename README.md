@@ -144,22 +144,6 @@ Se o container e a imagem não aparecerem na lista, a remoção foi concluída c
 
 ---
 
-### 11. Limpeza opcional (avançado)
-
-Se quiser realizar uma limpeza mais profunda no Docker (containers, imagens, redes e cache não utilizados):
-
------------------------------------
-`docker system prune -a -f`
------------------------------------
-
-E para também remover volumes não utilizados:
-
------------------------------------
-`docker system prune -a --volumes -f`
------------------------------------
-
----
-
 ### Observações importantes
 
 - O banco de dados **SQLite** é criado automaticamente dentro da pasta `app/database/`.
