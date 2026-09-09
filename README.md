@@ -148,10 +148,15 @@ Se o container e a imagem não aparecerem na lista, a remoção foi concluída c
 
 Após remover o container e a imagem Docker, você pode excluir a pasta do projeto caso não deseje mantê-la no computador.
 
+no Command Prompt:
 -----------------------------------
 `rmdir /s /q MVP3_FS_Back-End`
 -----------------------------------
 
+No PowerShell:
+-----------------------------------
+`Remove-Item -Recurse -Force MVP3_FS_Back-End`
+-----------------------------------
 ---
 
 ### Observações importantes
