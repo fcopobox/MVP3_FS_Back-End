@@ -1,6 +1,6 @@
 #####################################################################################
 #
-#                         MVP WeatherMap — Consulta sobre clima
+#                         MVP WeatherMap — Back-End
 #                Pós-Graduação em Full Stack Development - PUC Rio - 2026
 #                       
 #                               Francisco Silveira
