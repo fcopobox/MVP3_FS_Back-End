@@ -144,6 +144,16 @@ Se o container e a imagem não aparecerem na lista, a remoção foi concluída c
 
 ---
 
+### 11. Deletar a pasta onde o projeto foi clonado
+
+Após remover o container e a imagem Docker, você pode excluir a pasta do projeto caso não deseje mantê-la no computador.
+
+-----------------------------------
+`rmdir /s /q MVP3_FS_Back-End`
+-----------------------------------
+
+---
+
 ### Observações importantes
 
 - O banco de dados **SQLite** é criado automaticamente dentro da pasta `app/database/`.
