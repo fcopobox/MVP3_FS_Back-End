@@ -94,6 +94,8 @@ http://localhost:8000/docs
 
 A partir desta interface, é possível testar todos os endpoints de cadastro, autenticação e autorização de usuários.
 
+## Após os testes, para excluir o projeto:
+
 ### 7. Parar o container
 
 Caso deseje interromper a execução do backend:
