@@ -299,9 +299,9 @@ flowchart TD
 
     FE[WeatherMap Frontend]
 
-    API[External APIs]
+    API[APIs Externas]
 
-    BE[WeatherMap Backend<br/>Authentication Layer]
+    BE[WeatherMap Backend<br/>Camada de autenticação]
 
     DB[(Database<br/>User Data Storage)]
 
