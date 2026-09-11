@@ -292,6 +292,23 @@ Esta rota existe apenas para facilitar a verificação do funcionamento da API s
   Execução isolada e reprodutível do backend em modo de desenvolvimento.
 
 ---
+## Diagrama de Componentes da Solução
+
+```mermaid
+flowchart TD
+
+    FE[WeatherMap Frontend]
+
+    API[External APIs]
+
+    BE[WeatherMap Backend<br/>Authentication Layer]
+
+    DB[(Database<br/>User Data Storage)]
+
+    FE -->|Consumo direto| API
+    FE -->|Autenticação| BE
+    BE -->|Gerenciamento de acesso aos dados| DB
+```
 
 ## Licença
 
